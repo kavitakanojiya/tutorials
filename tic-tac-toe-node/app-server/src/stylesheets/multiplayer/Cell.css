@@ -1,0 +1,11 @@
+.cell {
+  background: #f8f8ff;
+  border: 2px solid #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #000;
+  border-radius: 10px;
+  font-size: 40px;
+  font-weight: bold;
+}
