@@ -124,7 +124,7 @@ class Game extends React.Component {
   render() {
     return (
       <div className='game'>
-        { this.renderCounter() } // Render Counter component
+        { this.renderCounter() /* Render Counter component  */ }
         { this.renderMessage() }
         { this.load() }
       </div>
