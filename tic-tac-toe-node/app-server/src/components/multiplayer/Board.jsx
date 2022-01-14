@@ -9,6 +9,12 @@ class Board extends React.Component {
     this.state = { board: props.board };
   }
 
+  // ::ADDED::
+  static getDerivedStateFromProps(nextProps, prevState) {
+    // Board component is rendered only once. Whenever re-rendered from Game, Board receives changes in its state
+    return { board: nextProps.board };
+  }
+
   renderCells() {
     let rows = [];
     for (let row = 0; row < this.state.board.length; row++) {

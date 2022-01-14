@@ -1,5 +1,16 @@
+.board-block {
+  display:  inline-block;
+  width: 50%;
+}
+
 .conclusion {
   display: inline-block;
   float: left;
   width: 20%;
+}
+
+.restart {
+  width: 20%;
+  display: inline-block;
+  vertical-align: top;
 }

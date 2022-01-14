@@ -1,6 +1,8 @@
 import React from 'react';
 import Board from './Board';
 import Counter from './Counter';
+// ::ADDED::
+import { Button } from '@mui/material'; /* Import Button component from material UI */
 import '../../stylesheets/multiplayer/Game.css';
 
 class Game extends React.Component {
@@ -10,9 +12,22 @@ class Game extends React.Component {
 
     this.players = ['X', 'O'];
     let board = [[null, null, null], [null, null, null], [null, null, null]];
-    // Add `outcome` to track number of wins and ties
     let outcome = { 'X': 0, 'O': 0, 'tie': 0 };
-    this.state = { board: board, currentPlayer: null, message: null, outcome: outcome };
+    // Introduce game_state to track the state of the game i.e. started, completed, etc.
+    // TODO: We will revisit to enhance this.
+    this.state = { game_state: 'started', board: board, currentPlayer: null, message: null, outcome: outcome };
+  }
+
+  // ::ADDED::
+  componentDidUpdate(prevProps, prevState) {
+    // Mark the game completed if its a tie or any player wins else skip.
+    if (this.state.game_state === 'started') {
+      if (this.isCompleted()) {
+        // Update outcome that tracks the number of wins and ties.
+        let gameOutcome = this.gameConcluded();
+        this.setState({ game_state: 'completed', outcome: gameOutcome.outcome, message: gameOutcome.message });
+      }
+    }
   }
 
   emptyCells() {
@@ -30,25 +45,22 @@ class Game extends React.Component {
     return cells;
   }
 
-  // ::CHANGED::
   gameConcluded() {
     let message = null;
     const currentState = this.isCompleted();
-    // Consider the latest outcome
     let outcome = this.state.outcome;
 
     if (currentState === 'X') {
       message = 'X wins!';
-      outcome.X += 1; // Increment X wins
+      outcome.X += 1;
     } else if (currentState === 'O') {
       message = 'O wins!';
-      outcome.O += 1; // Increment O wins
+      outcome.O += 1;
     } else if (currentState === 'tie') {
       message = 'It\'s a tie!';
-      outcome.tie += 1; // Increment ties
+      outcome.tie += 1;
     }
 
-    // Returns the message as well as latest increments
     return { message: message, outcome: outcome };
   }
 
@@ -88,25 +100,25 @@ class Game extends React.Component {
 
   load() {
     return (
-      <Board board={this.state.board} movePlayer={this.move.bind(this)} />
+      <div className='board-block'>
+        <Board board={this.state.board} movePlayer={this.move.bind(this)} />
+      </div>
     )
   }
 
-  // ::CHANGED::
   move(row, column) {
     const nextPlayer = this.players.filter(player => player != this.state.currentPlayer)[0];
     let updatedboard = this.state.board;
     if (updatedboard[row][column] == null) {
       updatedboard[row][column] = nextPlayer;
-      // Update outcome whenever a move is made
-      let gameOutcome = this.gameConcluded();
-      this.setState({ currentPlayer: nextPlayer, board: updatedboard, message: gameOutcome.message, outcome: gameOutcome.outcome });
+      // Now, disable this. We will update outcome when the game has completed
+      // let gameOutcome = this.gameConcluded();
+      // this.setState({ currentPlayer: nextPlayer, board: updatedboard, message: gameOutcome.message, outcome: gameOutcome.outcome });
+      this.setState({ currentPlayer: nextPlayer, board: updatedboard });
     }
   }
 
-  // ::ADDED::
   renderCounter() {
-    // Counter component handles the specifics like UI and other flow related to no. of wins and ties
     return (
       <Counter outcome={this.state.outcome} />
     )
@@ -120,15 +132,38 @@ class Game extends React.Component {
     )
   }
 
-  // ::CHANGED::
-  render() {
+  renderRestartButton() {
+    if (this.state.game_state !== 'completed') {
+      return null;
+    }
+
     return (
-      <div className='game'>
-        { this.renderCounter() /* Render Counter component  */ }
-        { this.renderMessage() }
-        { this.load() }
+      <div className='restart'>
+        <Button variant="contained" onClick={this.restart.bind(this)}>Restart</Button>
       </div>
     )
+  }
+
+  render() {
+    console.log(this.state)
+    return (
+      <div className='game'>
+        { this.renderCounter() }
+        { this.renderMessage() }
+        { this.load() }
+        { this.renderRestartButton() /* Let's restart the game so that players play continuously */ }
+      </div>
+    )
+  }
+
+  // ::ADDED::
+  restart() {
+    // Reset the board
+    let board = [[null, null, null], [null, null, null], [null, null, null]];
+    // Capture the outcome of the game so far
+    let outcome = this.state.outcome;
+    // Reset the attributes
+    this.setState({ game_state: 'started', board: board, currentPlayer: null, message: null, outcome: outcome });
   }
 }
 
