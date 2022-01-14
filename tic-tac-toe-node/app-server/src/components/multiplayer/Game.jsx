@@ -1,19 +1,20 @@
 import React from 'react';
 import Board from './Board';
+import Counter from './Counter';
 import '../../stylesheets/multiplayer/Game.css';
 
 class Game extends React.Component {
-  // ::Changed::
+  // ::CHANGED::
   constructor(props) {
     super(props);
 
     this.players = ['X', 'O'];
     let board = [[null, null, null], [null, null, null], [null, null, null]];
-    // Add `message` to track the win or tie
-    this.state = { board: board, currentPlayer: null, message: null };
+    // Add `outcome` to track number of wins and ties
+    let outcome = { 'X': 0, 'O': 0, 'tie': 0 };
+    this.state = { board: board, currentPlayer: null, message: null, outcome: outcome };
   }
 
-  // ::ADDED::
   emptyCells() {
     let cells = [];
     const currentBoard = this.state.board;
@@ -29,56 +30,55 @@ class Game extends React.Component {
     return cells;
   }
 
-  // ::ADDED::
+  // ::CHANGED::
   gameConcluded() {
     let message = null;
     const currentState = this.isCompleted();
+    // Consider the latest outcome
+    let outcome = this.state.outcome;
 
     if (currentState === 'X') {
-      message = 'X wins!';      
+      message = 'X wins!';
+      outcome.X += 1; // Increment X wins
     } else if (currentState === 'O') {
-      message = 'O wins';
+      message = 'O wins!';
+      outcome.O += 1; // Increment O wins
     } else if (currentState === 'tie') {
-      message = 'It\'s a tie!'
+      message = 'It\'s a tie!';
+      outcome.tie += 1; // Increment ties
     }
 
-    return message;
+    // Returns the message as well as latest increments
+    return { message: message, outcome: outcome };
   }
 
-  // ::ADDED::
   isCompleted() {
     let winner = null;
     const currentBoard = this.state.board;
 
-    // 1. Horizontal when elements are same
     for (let row = 0; row < currentBoard.length; row++) {
       if ((currentBoard[row][0] !== null) && ((currentBoard[row][0] === currentBoard[row][1]) && (currentBoard[row][1] === currentBoard[row][2]))) {
         winner = currentBoard[row][0]
       }
     }
 
-    // 2. Vertical when elements are same
     for (let column = 0; column < currentBoard.length; column++) {
       if ((currentBoard[0][column] !== null) && ((currentBoard[0][column] === currentBoard[1][column]) && (currentBoard[1][column] === currentBoard[2][column]))) {
         winner = currentBoard[0][column]
       }
     }
 
-    // 3. Diagonal: top-left to bottom-right
     if ((currentBoard[0][0] !== null) && ((currentBoard[0][0] === currentBoard[1][1]) && (currentBoard[1][1] === currentBoard[2][2]))) {
       winner = currentBoard[0][0]
     }
 
-    // 4. Diagonal: top-right to bottom-left
     if ((currentBoard[0][2] !== null) && ((currentBoard[0][2] === currentBoard[1][1]) && (currentBoard[1][1] === currentBoard[2][0]))) {
       winner = currentBoard[0][2]
     }
 
-    // 5. evaluate any open positions left
     let openPositions = 0
     openPositions += this.emptyCells().length
 
-    // 6. If no positions left, then it is a tie
     if ((openPositions === 0) && (winner === null)) {
       return 'tie'
     } else {
@@ -92,16 +92,26 @@ class Game extends React.Component {
     )
   }
 
+  // ::CHANGED::
   move(row, column) {
     const nextPlayer = this.players.filter(player => player != this.state.currentPlayer)[0];
     let updatedboard = this.state.board;
     if (updatedboard[row][column] == null) {
       updatedboard[row][column] = nextPlayer;
-      this.setState({ currentPlayer: nextPlayer, board: updatedboard, message: this.gameConcluded() });
+      // Update outcome whenever a move is made
+      let gameOutcome = this.gameConcluded();
+      this.setState({ currentPlayer: nextPlayer, board: updatedboard, message: gameOutcome.message, outcome: gameOutcome.outcome });
     }
   }
 
   // ::ADDED::
+  renderCounter() {
+    // Counter component handles the specifics like UI and other flow related to no. of wins and ties
+    return (
+      <Counter outcome={this.state.outcome} />
+    )
+  }
+
   renderMessage() {
     return (
       <div className='conclusion'>
@@ -114,8 +124,9 @@ class Game extends React.Component {
   render() {
     return (
       <div className='game'>
-      { this.renderMessage() }
-      { this.load() }
+        { this.renderCounter() } // Render Counter component
+        { this.renderMessage() }
+        { this.load() }
       </div>
     )
   }
