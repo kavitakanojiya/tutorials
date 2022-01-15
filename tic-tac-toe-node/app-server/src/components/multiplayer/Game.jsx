@@ -1,8 +1,7 @@
 import React from 'react';
 import Board from './Board';
 import Counter from './Counter';
-// ::ADDED::
-import { Button } from '@mui/material'; /* Import Button component from material UI */
+import { Button } from '@mui/material';
 import '../../stylesheets/multiplayer/Game.css';
 
 class Game extends React.Component {
@@ -22,7 +21,8 @@ class Game extends React.Component {
     // #currentPlayer: alternate player information
     // #message: has text as `X wins!` or `It's a tie`
     // #outcome: tracks number of wins and ties
-    // # playerInstance: current logged in player 
+    // #playerInstance: current logged in player
+    console.log(props.game)
     this.state = { gameState: 'initialized', game: props.game, board: props.game.board, currentPlayer: null, message: null, outcome: props.game.outcome, playerInstance: props.playerInstance };
   }
 
@@ -126,7 +126,6 @@ class Game extends React.Component {
     )
   }
 
-  // ::CHANGED::
   renderMessage() {
     // Skip unless both of the players have joined
     if (this.state.gameState === 'initialized') {
@@ -152,7 +151,6 @@ class Game extends React.Component {
     )
   }
 
-  // ::CHANGED::
   render() {
     return (
       <div className='game'>
@@ -171,7 +169,6 @@ class Game extends React.Component {
     this.setState({ gameState: 'started', board: board, currentPlayer: null, message: null, outcome: outcome });
   }
 
-  // ::ADDED::
   roomInfo() {
     // Display room Id as well as an text for the player to know that the other player is yet to join
     return (

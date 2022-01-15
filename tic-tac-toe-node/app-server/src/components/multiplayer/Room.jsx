@@ -7,6 +7,7 @@ const axios = require('axios');
 const apiUrl = `http://${process.env.WDS_SOCKET_HOST}:${process.env.WDS_SOCKET_PORT}`;
 
 class Room extends React.Component {
+  // ::CHANGED::
   constructor(props) {
     super(props);
 
@@ -17,9 +18,10 @@ class Room extends React.Component {
     // 2. `created`: used when player a created or joined a room and show them the matrix
 
     // #room.id: Each room will be identified by unique identifier
+    // #room.token: Holds value only when a player joins the room using room Id
     // #game: game is the initialized state when a room is created and we will be used/updated throughout the space
     // #playerInstance: identifies which player it is i.e. X & O. This will help players to play alternatively
-    this.state = { roomState: 'initialized', room: { id: null }, game: this.game, playerInstance: null };
+    this.state = { roomState: 'initialized', room: { id: null, token: null }, game: this.game, playerInstance: null };
   }
 
   createRoom() {
@@ -54,8 +56,14 @@ class Room extends React.Component {
     }
   }
 
+  // ::ADDED::
   handleChange() {
-    // TODO
+    // Existing room config
+    let room = this.state.room;
+    // Update the token with the entered room ID
+    room['token'] = event.target.value;
+    // Update the state of the room
+    this.setState({ room: room });
   }
 
   initializeGame() {
@@ -73,8 +81,24 @@ class Room extends React.Component {
     return game;
   }
 
+  // ::ADDED::
   joinRoom() {
-    // TODO
+    let player_O = { identifier: 'O' };
+    this.game.players.push(player_O);
+
+    // Register `game` on the api-server
+    axios.post(`${apiUrl}/multiplayer/joinRoom`, { roomId: this.state.room.token, game: this.game })
+    .then(response => {
+      // Update the current state of the room
+      console.log('response:', response)
+      this.setState({ roomState: 'created', room: { id: response.data.roomId }, game: response.data.game, playerInstance: player_O });
+    })
+    .catch(error => {
+      console.log(error);
+    })
+    .then(() => {
+      // do something
+    });
   }
 
   renderOptions() {

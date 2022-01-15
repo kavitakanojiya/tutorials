@@ -40,7 +40,7 @@ app.post('/multiplayer/createRoom', function(request, response) {
 // ::ADDED::
 // 4.3 API(#b): join a room
 app.post('/multiplayer/joinRoom', function(request, response) {
-  player = request.body['game'].players[0];
+  const player = request.body['game'].players[0];
   game.players.push(player);
   let json_resp = { roomId: request.body.roomId, game: game };
   response.json(json_resp);
