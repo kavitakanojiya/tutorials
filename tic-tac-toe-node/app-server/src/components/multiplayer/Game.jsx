@@ -11,21 +11,26 @@ class Game extends React.Component {
     super(props);
 
     this.players = ['X', 'O'];
-    let board = [[null, null, null], [null, null, null], [null, null, null]];
-    let outcome = { 'X': 0, 'O': 0, 'tie': 0 };
-    // Introduce game_state to track the state of the game i.e. started, completed, etc.
-    // TODO: We will revisit to enhance this.
-    this.state = { game_state: 'started', board: board, currentPlayer: null, message: null, outcome: outcome };
+    this.roomId = props.roomId; // Retain room information
+    // A game will have 2 states:
+    // 1. `initialized`: when the first player has joined and the other is yet to join.
+    // 2. `started`: when both X & O have joined
+    // 3. `completed`: when the game has a tie or either of the player has won
+
+    // #game: game is the initialized state when a room is created and we will be used/updated throughout the space
+    // #board: current state of the board when move is made
+    // #currentPlayer: alternate player information
+    // #message: has text as `X wins!` or `It's a tie`
+    // #outcome: tracks number of wins and ties
+    // # playerInstance: current logged in player 
+    this.state = { gameState: 'initialized', game: props.game, board: props.game.board, currentPlayer: null, message: null, outcome: props.game.outcome, playerInstance: props.playerInstance };
   }
 
-  // ::ADDED::
   componentDidUpdate(prevProps, prevState) {
-    // Mark the game completed if its a tie or any player wins else skip.
-    if (this.state.game_state === 'started') {
+    if (this.state.gameState === 'started') {
       if (this.isCompleted()) {
-        // Update outcome that tracks the number of wins and ties.
         let gameOutcome = this.gameConcluded();
-        this.setState({ game_state: 'completed', outcome: gameOutcome.outcome, message: gameOutcome.message });
+        this.setState({ gameState: 'completed', outcome: gameOutcome.outcome, message: gameOutcome.message });
       }
     }
   }
@@ -98,7 +103,6 @@ class Game extends React.Component {
     }
   }
 
-  // ::CHANGED::
   load() {
     return (
       <div className='board-block'>
@@ -108,13 +112,10 @@ class Game extends React.Component {
   }
 
   move(row, column) {
-    const nextPlayer = this.players.filter(player => player != this.state.currentPlayer)[0];
+    const nextPlayer = this.players.filter(player => player !== this.state.currentPlayer)[0];
     let updatedboard = this.state.board;
     if (updatedboard[row][column] == null) {
       updatedboard[row][column] = nextPlayer;
-      // Now, disable this. We will update outcome when the game has completed
-      // let gameOutcome = this.gameConcluded();
-      // this.setState({ currentPlayer: nextPlayer, board: updatedboard, message: gameOutcome.message, outcome: gameOutcome.outcome });
       this.setState({ currentPlayer: nextPlayer, board: updatedboard });
     }
   }
@@ -125,7 +126,13 @@ class Game extends React.Component {
     )
   }
 
+  // ::CHANGED::
   renderMessage() {
+    // Skip unless both of the players have joined
+    if (this.state.gameState === 'initialized') {
+      return;
+    }
+
     return (
       <div className='conclusion'>
         Status: { this.state.message || '--' }
@@ -133,9 +140,8 @@ class Game extends React.Component {
     )
   }
 
-  // ::ADDED::
   renderRestartButton() {
-    if (this.state.game_state !== 'completed') {
+    if (this.state.gameState !== 'completed') {
       return null;
     }
 
@@ -151,21 +157,29 @@ class Game extends React.Component {
     return (
       <div className='game'>
         { this.renderCounter() }
+        { this.roomInfo() /* Render room information */ }
         { this.renderMessage() }
         { this.load() }
-        { this.renderRestartButton() /* Let's restart the game so that players play continuously */ }
+        { this.renderRestartButton() }
       </div>
     )
   }
 
-  // ::ADDED::
   restart() {
-    // Reset the board
     let board = [[null, null, null], [null, null, null], [null, null, null]];
-    // Capture the outcome of the game so far
     let outcome = this.state.outcome;
-    // Reset the attributes
-    this.setState({ game_state: 'started', board: board, currentPlayer: null, message: null, outcome: outcome });
+    this.setState({ gameState: 'started', board: board, currentPlayer: null, message: null, outcome: outcome });
+  }
+
+  // ::ADDED::
+  roomInfo() {
+    // Display room Id as well as an text for the player to know that the other player is yet to join
+    return (
+      <div className='roomInfo'>
+        <div>Room ID: {this.props.roomId}</div>
+        {(this.state.gameState === 'initialized') && (<div>Waiting for the other player to join...</div>)}
+      </div>
+    )
   }
 }
 

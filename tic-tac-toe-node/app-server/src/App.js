@@ -1,11 +1,13 @@
 import logo from './logo.svg';
 import './App.css';
-import Game from './components/multiplayer/Game';
+// ::ADDED::
+import Room from './components/multiplayer/Room';
 
+// ::CHANGED::
 function App() {
   return (
     <div className="App">
-      <Game />
+      <Room /> { /* Call Room component */ }
     </div>
   );
 }

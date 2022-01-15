@@ -1,0 +1,28 @@
+.roomOptions {
+  background-color: #f8f8ff;
+  border-radius: 5px;
+  display: inline-block;
+  margin: 45px auto;
+  width: 28%;
+  padding: 10%;
+}
+
+.createRoom {
+  display: inline-block;
+  float: left;
+}
+
+.joinRoom {
+  display: inline-block;
+  float: right;
+  margin-left: 10px;
+}
+
+.joinRoom button {
+  margin-left: 10px;
+}
+
+.or {
+  display: inline-block;
+  padding: 9px 0;
+}

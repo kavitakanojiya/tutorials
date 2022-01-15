@@ -4,10 +4,12 @@
   float: left;
 }
 
-.conclusion {
+.conclusion, .roomInfo {
   display: inline-block;
   float: left;
   width: 20%;
+  text-align: left;
+  padding-left: 20px;
 }
 
 .restart {
