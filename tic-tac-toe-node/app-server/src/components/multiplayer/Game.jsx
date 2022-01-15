@@ -98,6 +98,7 @@ class Game extends React.Component {
     }
   }
 
+  // ::CHANGED::
   load() {
     return (
       <div className='board-block'>
@@ -132,6 +133,7 @@ class Game extends React.Component {
     )
   }
 
+  // ::ADDED::
   renderRestartButton() {
     if (this.state.game_state !== 'completed') {
       return null;
@@ -144,8 +146,8 @@ class Game extends React.Component {
     )
   }
 
+  // ::CHANGED::
   render() {
-    console.log(this.state)
     return (
       <div className='game'>
         { this.renderCounter() }
