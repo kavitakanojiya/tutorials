@@ -1,6 +1,7 @@
 .board-block {
   display:  inline-block;
-  width: 50%;
+  width: 60%;
+  float: left;
 }
 
 .conclusion {
