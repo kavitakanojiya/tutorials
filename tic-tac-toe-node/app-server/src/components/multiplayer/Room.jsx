@@ -21,7 +21,7 @@ class Room extends React.Component {
     // #room.token: Holds value only when a player joins the room using room Id
     // #game: game is the initialized state when a room is created and we will be used/updated throughout the space
     // #playerInstance: identifies which player it is i.e. X & O. This will help players to play alternatively
-    this.state = { roomState: 'initialized', room: { id: null, token: null }, game: this.game, playerInstance: null };
+    this.state = { roomState: 'initialized', joinRoom: false, room: { id: null, token: null }, game: this.game, playerInstance: null };
   }
 
   createRoom() {
@@ -44,6 +44,7 @@ class Room extends React.Component {
     });
   }
 
+  // ::CHANGED::
   display() {
     // :initialized state with display the options to either create a room or to join one
     // :created state switch the UI to display 3x3 matrix
@@ -51,12 +52,12 @@ class Room extends React.Component {
       return this.renderOptions();
     } else if (this.state.roomState === 'created') {
       return (
-        <Game roomId={this.state.room.id} game={this.state.game} playerInstance={this.state.playerInstance} />
+        /* Room component now sends the join and create room event to take distinct actions in each event */
+        <Game roomId={this.state.room.id} joinRoom={this.state.joinRoom} game={this.state.game} playerInstance={this.state.playerInstance} />
       )
     }
   }
 
-  // ::ADDED::
   handleChange() {
     // Existing room config
     let room = this.state.room;
@@ -81,7 +82,7 @@ class Room extends React.Component {
     return game;
   }
 
-  // ::ADDED::
+  // ::CHANGED::
   joinRoom() {
     let player_O = { identifier: 'O' };
     this.game.players.push(player_O);
@@ -89,9 +90,8 @@ class Room extends React.Component {
     // Register `game` on the api-server
     axios.post(`${apiUrl}/multiplayer/joinRoom`, { roomId: this.state.room.token, game: this.game })
     .then(response => {
-      // Update the current state of the room
-      console.log('response:', response)
-      this.setState({ roomState: 'created', room: { id: response.data.roomId }, game: response.data.game, playerInstance: player_O });
+      /* Room component now sets the joinRoom to understand which player has joined */
+      this.setState({ roomState: 'created', joinRoom: true, room: { id: response.data.roomId }, game: response.data.game, playerInstance: player_O });
     })
     .catch(error => {
       console.log(error);

@@ -1,11 +1,15 @@
 import React from 'react';
+import { io } from 'socket.io-client'; // ::ADDED::
 import Board from './Board';
 import Counter from './Counter';
 import { Button } from '@mui/material';
 import '../../stylesheets/multiplayer/Game.css';
 
+// ::ADDED:
+const webSocketUrl = `ws://${process.env.WDS_SOCKET_HOST}:${process.env.WDS_SOCKET_PORT}`;
+const socket = io(webSocketUrl, {'transports': ['websocket']});
+
 class Game extends React.Component {
-  // ::CHANGED::
   constructor(props) {
     super(props);
 
@@ -22,8 +26,13 @@ class Game extends React.Component {
     // #message: has text as `X wins!` or `It's a tie`
     // #outcome: tracks number of wins and ties
     // #playerInstance: current logged in player
-    console.log(props.game)
+    console.log(props)
     this.state = { gameState: 'initialized', game: props.game, board: props.game.board, currentPlayer: null, message: null, outcome: props.game.outcome, playerInstance: props.playerInstance };
+  }
+
+  // ::ADDED::
+  componentDidMount() {
+    this.socket();
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -33,6 +42,36 @@ class Game extends React.Component {
         this.setState({ gameState: 'completed', outcome: gameOutcome.outcome, message: gameOutcome.message });
       }
     }
+  }
+
+  // ::ADDED::
+  // Events registered on socket connection
+  // 1. `createRoom`: to create a socket connection by room id
+  // 2. `joinRoom`: to join a socket connection by room id
+  // 3. `startGame:...`: when both the players have joined the room and the game can be started
+  socket() {
+    socket.on('connect', function() {
+      console.log('Connected to API server');
+    });
+
+    // Emit updates according to action i.e. whether a player has joined or created a room.
+    // Create a socket by roomId so that both of the players receives updates of the same game.
+    if (this.props.joinRoom === true) {
+      socket.emit('joinRoom', this.state.game, this.roomId);
+    } else {
+      socket.emit('createRoom', this.state.game, this.roomId);
+    }
+
+    // Listen to 'startGame' event and change the state
+    socket.on('startGame:' + this.props.roomId,  () => {
+      this.setState({ gameState: 'started' });
+    });
+
+    // Receive updates made to the game
+    socket.on(this.props.roomId, (currentGame) => {
+      // TODO:
+      console.log(this.props.roomId, this.state.playerInstance, currentGame);
+    });
   }
 
   emptyCells() {
@@ -155,7 +194,8 @@ class Game extends React.Component {
     return (
       <div className='game'>
         { this.renderCounter() }
-        { this.roomInfo() /* Render room information */ }
+        { this.roomInfo() }
+        <br />
         { this.renderMessage() }
         { this.load() }
         { this.renderRestartButton() }
