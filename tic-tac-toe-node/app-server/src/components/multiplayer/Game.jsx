@@ -33,7 +33,6 @@ class Game extends React.Component {
     // #message: has text as `X wins!` or `It's a tie`
     // #outcome: tracks number of wins and ties
     // #playerInstance: current logged in player
-    console.log(props)
     this.state = { gameState: 'initialized', game: props.game, board: props.game.board, currentPlayer: null, message: null, outcome: props.game.outcome, playerInstance: props.playerInstance };
   }
 
@@ -86,7 +85,6 @@ class Game extends React.Component {
     // ::ADDED
     // Restart the game
     socket.on(('restartGame:' + this.props.roomId), currentGame => {
-      console.log('restartGame:' + this.props.roomId, this.state.playerInstance, currentGame);
       let board = currentGame.board;
       let currentPlayer = currentGame.currentPlayer || { identifier: 'X' };
       let outcome = currentGame.outcome;
@@ -227,7 +225,6 @@ class Game extends React.Component {
   }
 
   render() {
-    console.log('Render:', this.state);
     return (
       <div className='game'>
         <div className='left'>

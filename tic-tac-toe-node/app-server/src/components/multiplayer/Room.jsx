@@ -63,7 +63,7 @@ class Room extends React.Component {
     }
   }
 
-  handleChange() {
+  handleChange(event) {
     // Existing room config
     let room = this.state.room;
     // Update the token with the entered room ID
