@@ -7,7 +7,6 @@ const axios = require('axios');
 const apiUrl = `http://${process.env.WDS_SOCKET_HOST}:${process.env.WDS_SOCKET_PORT}`;
 
 class Room extends React.Component {
-  // ::CHANGED::
   constructor(props) {
     super(props);
 
@@ -44,7 +43,6 @@ class Room extends React.Component {
     });
   }
 
-  // ::CHANGED::
   display() {
     // :initialized state with display the options to either create a room or to join one
     // :created state switch the UI to display 3x3 matrix
@@ -82,7 +80,6 @@ class Room extends React.Component {
     return game;
   }
 
-  // ::CHANGED::
   joinRoom() {
     let player_O = { identifier: 'O' };
     this.game.players.push(player_O);

@@ -2,14 +2,12 @@
 const express = require('express');
 const http = require('http');
 const cors = require('cors');
-// ::ADDED::
 const socketIO = require('socket.io');
 
 // 2. Load environment variables //
 // 2.1 Read port from the command if at all provided
 const port = process.env.PORT || 4000;
-// ::ADDED::
-// Since requests are coming in from the different host, app server's url has to be whitelisted while initializing websocket
+// 2.2 Since requests are coming in from the different host, app server's url has to be whitelisted while initializing websocket
 const allowedOrigins = "http://localhost:* http://127.0.0.1:* localhost:* 127.0.0.1:*";
 
 // Temp variables //
@@ -51,7 +49,7 @@ app.post('/multiplayer/joinRoom', function(request, response) {
   response.json(json_resp);
 });
 
-// ::ADDED::
+// ::CHANGED::
 // 5. Define websocket APIs //
 io.on('connection', (socket) => {
   console.log('New user connected');
@@ -75,6 +73,15 @@ io.on('connection', (socket) => {
     // NOTE: We could merged b.1 & b.2 and it would work fine.
     console.log('Starting the game');
     io.emit('startGame:' + roomId);
+  });
+
+  // New event `play` added
+  socket.on('play', (currentGame, roomId) => {
+    console.log('Playing...');
+    game = currentGame;
+
+    // emit events to both X & O
+    socket.broadcast.emit(roomId, game);
   });
 });
 

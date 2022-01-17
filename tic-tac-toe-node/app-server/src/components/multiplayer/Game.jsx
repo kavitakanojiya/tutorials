@@ -5,7 +5,6 @@ import Counter from './Counter';
 import { Button } from '@mui/material';
 import '../../stylesheets/multiplayer/Game.css';
 
-// ::ADDED:
 const webSocketUrl = `ws://${process.env.WDS_SOCKET_HOST}:${process.env.WDS_SOCKET_PORT}`;
 const socket = io(webSocketUrl, {'transports': ['websocket']});
 
@@ -44,7 +43,6 @@ class Game extends React.Component {
     }
   }
 
-  // ::ADDED::
   // Events registered on socket connection
   // 1. `createRoom`: to create a socket connection by room id
   // 2. `joinRoom`: to join a socket connection by room id
@@ -67,10 +65,17 @@ class Game extends React.Component {
       this.setState({ gameState: 'started' });
     });
 
+    // ::ADDED::
     // Receive updates made to the game
     socket.on(this.props.roomId, (currentGame) => {
-      // TODO:
       console.log(this.props.roomId, this.state.playerInstance, currentGame);
+      let board = currentGame.board;
+      let currentPlayer = currentGame.currentPlayer || { identifier: 'X' };
+      let outcome = currentGame.outcome;
+      let players = currentGame.players;
+      let state = currentGame.state;
+      let winner = currentGame.winner;
+      this.setState({ game: currentGame, board: board, currentPlayer: currentPlayer, outcome: outcome });
     });
   }
 
@@ -150,12 +155,23 @@ class Game extends React.Component {
     )
   }
 
+  // ::CHANGED::
   move(row, column) {
-    const nextPlayer = this.players.filter(player => player !== this.state.currentPlayer)[0];
+    // Ensure a player is allowed alternatively
+    if (this.state.playerInstance.identifier !== this.state.currentPlayer.identifier) {
+      return;
+    }
+
+    const nextPlayerIdentifier = this.players.filter(player => player !== this.state.currentPlayer.identifier)[0];
+    const nextPlayer = { identifier: nextPlayerIdentifier };
     let updatedboard = this.state.board;
+    let currentGame = this.state.game;
     if (updatedboard[row][column] == null) {
-      updatedboard[row][column] = nextPlayer;
-      this.setState({ currentPlayer: nextPlayer, board: updatedboard });
+      updatedboard[row][column] = this.state.currentPlayer.identifier; // Set the current player's move
+      currentGame.board = updatedboard; // Update the board in the game object
+      currentGame.currentPlayer = nextPlayer; // Update the current player in the game object
+      this.setState({ currentPlayer: nextPlayer, board: updatedboard, game: currentGame }); // Update the state
+      socket.emit('play', this.state.game, this.roomId); // Emit changes of the game to the other player
     }
   }
 
@@ -191,6 +207,7 @@ class Game extends React.Component {
   }
 
   render() {
+    console.log('Render:', this.state);
     return (
       <div className='game'>
         { this.renderCounter() }
