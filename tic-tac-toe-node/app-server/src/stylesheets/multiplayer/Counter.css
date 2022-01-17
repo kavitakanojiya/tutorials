@@ -1,3 +1,9 @@
+.counter {
+  display: inline-block;
+  width: 50%;
+  float: left;
+}
+
 .counter div {
   display: inline-block;
   margin: 10px 20px;

@@ -4,6 +4,7 @@ import Board from './Board';
 import Counter from './Counter';
 import { Button } from '@mui/material';
 import '../../stylesheets/multiplayer/Game.css';
+import RestartIcon from '../../images/restart.png';
 
 const webSocketUrl = `ws://${process.env.WDS_SOCKET_HOST}:${process.env.WDS_SOCKET_PORT}`;
 const socket = io(webSocketUrl, {'transports': ['websocket']});
@@ -150,6 +151,7 @@ class Game extends React.Component {
   load() {
     return (
       <div className='board-block'>
+        { this.renderRestartButton() }
         <Board board={this.state.board} movePlayer={this.move.bind(this)} />
       </div>
     )
@@ -200,8 +202,10 @@ class Game extends React.Component {
     }
 
     return (
-      <div className='restart'>
-        <Button variant="contained" onClick={this.restart.bind(this)}>Restart</Button>
+      <div className='overlay'>
+        <div className='restart' onClick={this.restart.bind(this)}>
+          <img src={RestartIcon} />
+        </div>
       </div>
     )
   }
@@ -210,12 +214,14 @@ class Game extends React.Component {
     console.log('Render:', this.state);
     return (
       <div className='game'>
-        { this.renderCounter() }
-        { this.roomInfo() }
-        <br />
-        { this.renderMessage() }
-        { this.load() }
-        { this.renderRestartButton() }
+        <div className='left'>
+          { this.roomInfo() }
+          { this.renderMessage() }
+        </div>
+        <div className='right'>
+          { this.renderCounter() }
+          { this.load() }
+        </div>
       </div>
     )
   }
