@@ -7,8 +7,9 @@ const socketIO = require('socket.io');
 // 2. Load environment variables //
 // 2.1 Read port from the command if at all provided
 const port = process.env.PORT || 4000;
+// ::CHANGED::
 // 2.2 Since requests are coming in from the different host, app server's url has to be whitelisted while initializing websocket
-const allowedOrigins = "http://localhost:* http://127.0.0.1:* localhost:* 127.0.0.1:*";
+const allowedOrigins = "https://api-server-ifggq.ondigitalocean.app/* http://localhost:* http://127.0.0.1:* localhost:* 127.0.0.1:*";
 
 // Temp variables //
 // NOTE: Creating single instance of game at a time //

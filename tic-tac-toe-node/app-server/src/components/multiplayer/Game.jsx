@@ -6,7 +6,14 @@ import { Button } from '@mui/material';
 import '../../stylesheets/multiplayer/Game.css';
 import RestartIcon from '../../images/restart.png';
 
-const webSocketUrl = `ws://${process.env.WDS_SOCKET_HOST}:${process.env.WDS_SOCKET_PORT}`;
+// ::CHANGED::
+// const webSocketUrl = `ws://${process.env.WDS_SOCKET_HOST}:${process.env.WDS_SOCKET_PORT}`;
+let webSocketUrl;
+if(process.env.NODE_ENV === 'development') {
+  webSocketUrl = `ws://${process.env.WDS_SOCKET_HOST}:${process.env.WDS_SOCKET_PORT}`;
+} else {
+  webSocketUrl = `wss://${process.env.WDS_SOCKET_HOST}`;
+}
 const socket = io(webSocketUrl, {'transports': ['websocket']});
 
 class Game extends React.Component {

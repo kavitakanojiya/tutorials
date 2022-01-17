@@ -4,7 +4,14 @@ import Game from './Game';
 import '../../stylesheets/multiplayer/Room.css';
 
 const axios = require('axios');
-const apiUrl = `http://${process.env.WDS_SOCKET_HOST}:${process.env.WDS_SOCKET_PORT}`;
+// ::CHANGED::
+// const apiUrl = `http://${process.env.WDS_SOCKET_HOST}:${process.env.WDS_SOCKET_PORT}`;
+let apiUrl;
+if(process.env.NODE_ENV === 'development') {
+  apiUrl = `http://${process.env.WDS_SOCKET_HOST}:${process.env.WDS_SOCKET_PORT}`;
+} else {
+  apiUrl = `https://${process.env.WDS_SOCKET_HOST}`;
+}
 
 class Room extends React.Component {
   constructor(props) {
