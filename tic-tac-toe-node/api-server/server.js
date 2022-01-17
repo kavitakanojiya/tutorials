@@ -75,13 +75,21 @@ io.on('connection', (socket) => {
     io.emit('startGame:' + roomId);
   });
 
-  // New event `play` added
+  // New event `play`
   socket.on('play', (currentGame, roomId) => {
     console.log('Playing...');
     game = currentGame;
 
     // emit events to both X & O
     socket.broadcast.emit(roomId, game);
+  });
+
+  // Restart event `restart` added
+  socket.on('restart', (currentGame, roomId) => {
+    console.log('Restarting...');
+    game = currentGame;
+
+    io.emit('restartGame:' + roomId, game);
   });
 });
 

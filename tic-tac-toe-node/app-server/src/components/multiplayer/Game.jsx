@@ -30,7 +30,6 @@ class Game extends React.Component {
     this.state = { gameState: 'initialized', game: props.game, board: props.game.board, currentPlayer: null, message: null, outcome: props.game.outcome, playerInstance: props.playerInstance };
   }
 
-  // ::ADDED::
   componentDidMount() {
     this.socket();
   }
@@ -66,10 +65,8 @@ class Game extends React.Component {
       this.setState({ gameState: 'started' });
     });
 
-    // ::ADDED::
     // Receive updates made to the game
     socket.on(this.props.roomId, (currentGame) => {
-      console.log(this.props.roomId, this.state.playerInstance, currentGame);
       let board = currentGame.board;
       let currentPlayer = currentGame.currentPlayer || { identifier: 'X' };
       let outcome = currentGame.outcome;
@@ -77,6 +74,19 @@ class Game extends React.Component {
       let state = currentGame.state;
       let winner = currentGame.winner;
       this.setState({ game: currentGame, board: board, currentPlayer: currentPlayer, outcome: outcome });
+    });
+
+    // ::ADDED
+    // Restart the game
+    socket.on(('restartGame:' + this.props.roomId), currentGame => {
+      console.log('restartGame:' + this.props.roomId, this.state.playerInstance, currentGame);
+      let board = currentGame.board;
+      let currentPlayer = currentGame.currentPlayer || { identifier: 'X' };
+      let outcome = currentGame.outcome;
+      let players = currentGame.players;
+      let state = currentGame.state;
+      let winner = currentGame.winner;
+      this.setState({ gameState: 'started', game: currentGame, board: board, currentPlayer: currentPlayer, outcome: outcome, message: null });
     });
   }
 
@@ -157,7 +167,6 @@ class Game extends React.Component {
     )
   }
 
-  // ::CHANGED::
   move(row, column) {
     // Ensure a player is allowed alternatively
     if (this.state.playerInstance.identifier !== this.state.currentPlayer.identifier) {
@@ -226,10 +235,24 @@ class Game extends React.Component {
     )
   }
 
+  // ::CHANGED::
   restart() {
-    let board = [[null, null, null], [null, null, null], [null, null, null]];
+    // Retain stats
     let outcome = this.state.outcome;
-    this.setState({ gameState: 'started', board: board, currentPlayer: null, message: null, outcome: outcome });
+    // Set X as the first player
+    let currentPlayer = { identifier: 'X' };
+    // Reset board
+    let board = [[null, null, null], [null, null, null], [null, null, null]];
+    // Update game object
+    let newGame = this.state.game;
+    newGame.board = board;
+    newGame.outcome = outcome;
+    newGame.currentPlayer = currentPlayer;
+    newGame.winner = null;
+    newGame.state = null;
+    this.setState({ gameState: 'started', game: newGame, board: board, currentPlayer: currentPlayer, message: null, outcome: outcome });
+    // Restart the game for both of the players and emit the changes
+    socket.emit('restart', newGame, this.roomId);
   }
 
   roomInfo() {
